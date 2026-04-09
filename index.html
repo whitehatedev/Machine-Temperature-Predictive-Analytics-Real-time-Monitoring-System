@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Temperature Predictive Analytics | Dark Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', 'Inter', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #0f1235 50%, #1a1f4e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #0d1117 0%, #0f1422 100%);
+            border-radius: 20px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(66, 153, 225, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Connection Panel */
+        .connection-panel {
+            background: linear-gradient(135deg, #0d1117 0%, #0f1422 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        .com-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        select {
+            background: #1e2438;
+            border: 1px solid #3b82f6;
+            color: #e0e0e0;
+            min-width: 180px;
+        }
+
+        select:hover {
+            background: #2d3550;
+            border-color: #60a5fa;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        }
+
+        button:disabled {
+            background: #2d3748;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #disconnectBtn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        #disconnectBtn:hover {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .status {
+            margin-top: 18px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status.connected {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status.disconnected {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #0d1117 0%, #0f1422 100%);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(66, 153, 225, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .stat-title {
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-unit {
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .stat-trend {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .trend-up { 
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171; 
+        }
+        .trend-down { 
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80; 
+        }
+        .trend-stable {
+            background: rgba(100, 116, 139, 0.2);
+            color: #94a3b8;
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+            gap: 22px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, #0d1117 0%, #0f1422 100%);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(66, 153, 225, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid #3b82f6;
+            padding-left: 15px;
+        }
+
+        canvas {
+            max-height: 320px;
+            width: 100%;
+        }
+
+        /* Alerts Section */
+        .alerts-section {
+            background: linear-gradient(135deg, #0d1117 0%, #0f1422 100%);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(66, 153, 225, 0.15);
+        }
+
+        .alerts-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid #ef4444;
+            padding-left: 15px;
+        }
+
+        .alerts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .alerts-table th,
+        .alerts-table td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .alerts-table th {
+            background: rgba(30, 36, 56, 0.5);
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alert-critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border-left: 3px solid #ef4444;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border-left: 3px solid #f59e0b;
+        }
+
+        /* Predictive Alert */
+        .predictive-alert {
+            margin-bottom: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f1422;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+            
+            .header {
+                padding: 18px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3b82f6;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>🔧</span>
+                Machine Temperature Predictive Analytics
+                <span style="font-size: 14px;">⚡ Real-time</span>
+            </h1>
+            <div class="subtitle">Advanced monitoring & predictive maintenance system with AI-powered forecasting</div>
+        </div>
+
+        <div class="connection-panel">
+            <div class="com-controls">
+                <select id="comPort">
+                    <option value="">🔌 Select COM Port</option>
+                </select>
+                <button id="connectBtn" onclick="connectToSerial()">🔗 Connect Device</button>
+                <button id="disconnectBtn" onclick="disconnectFromSerial()" disabled>🔌 Disconnect</button>
+                <button onclick="clearData()">🗑️ Clear History</button>
+                <button onclick="exportData()">📥 Export Data</button>
+            </div>
+            <div id="connectionStatus" class="status disconnected">
+                <span>⭕</span> Status: Disconnected - Click Connect to start receiving data
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">🌡️ Current Temperature</div>
+                <div class="stat-value"><span id="currentTemp">--</span><span class="stat-unit">°C</span></div>
+                <div class="stat-trend" id="tempTrend"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">💧 Current Humidity</div>
+                <div class="stat-value"><span id="currentHum">--</span><span class="stat-unit">%</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">📊 Average Temperature</div>
+                <div class="stat-value"><span id="avgTemp">--</span><span class="stat-unit">°C</span></div>
+                <div style="font-size: 12px; color:#64748b">Last 50 readings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">📈 Max Temperature</div>
+                <div class="stat-value"><span id="maxTemp">--</span><span class="stat-unit">°C</span></div>
+                <div style="font-size: 12px; color:#64748b">Peak recorded</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">📈 Real-time Temperature & Humidity</div>
+                <canvas id="realtimeChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">🔮 Predictive Forecast (Next 10 Readings)</div>
+                <canvas id="predictiveChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">📊 Temperature Distribution</div>
+                <canvas id="histogramChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">⚠️ Anomaly Detection</div>
+                <canvas id="anomalyChart"></canvas>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <div class="alerts-title">🚨 Live Alerts & Predictive Warnings</div>
+            <div id="predictiveAlert" class="predictive-alert"></div>
+            <table class="alerts-table">
+                <thead>
+                    <tr>
+                        <th>⏰ Time</th>
+                        <th>🌡️ Temperature</th>
+                        <th>⚠️ Alert Type</th>
+                        <th>📝 Message</th>
+                    </tr>
+                </thead>
+                <tbody id="alertsTableBody">
+                    <tr><td colspan="4" style="text-align: center; color: #64748b;">No alerts yet - System monitoring</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let port;
+        let reader;
+        let temperatureData = [];
+        let humidityData = [];
+        let timeLabels = [];
+        let alertHistory = [];
+        let realtimeChart, predictiveChart, histogramChart, anomalyChart;
+        
+        // Thresholds
+        const TEMP_WARNING = 35;
+        const TEMP_CRITICAL = 45;
+        const PREDICTION_WINDOW = 10;
+
+        // Initialize charts with dark theme
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#e0e0e0', font: { size: 12 } }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(100, 116, 139, 0.1)' } },
+                    y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(100, 116, 139, 0.1)' } }
+                }
+            };
+
+            const ctx1 = document.getElementById('realtimeChart').getContext('2d');
+            const ctx2 = document.getElementById('predictiveChart').getContext('2d');
+            const ctx3 = document.getElementById('histogramChart').getContext('2d');
+            const ctx4 = document.getElementById('anomalyChart').getContext('2d');
+
+            realtimeChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Temperature (°C)',
+                            data: [],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#60a5fa',
+                            pointBorderColor: '#1e3a8a',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Humidity (%)',
+                            data: [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#34d399',
+                            pointBorderColor: '#064e3b',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    ...chartOptions,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { title: { display: true, text: 'Temperature (°C)', color: '#94a3b8' } },
+                        y1: { position: 'right', title: { display: true, text: 'Humidity (%)', color: '#94a3b8' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            predictiveChart = new Chart(ctx2, {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: 'Predicted Temperature (°C)', 
+                        data: [], 
+                        borderColor: '#8b5cf6', 
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2,
+                        borderDash: [8, 4],
+                        pointBackgroundColor: '#a78bfa',
+                        pointRadius: 5,
+                        fill: true
+                    }] 
+                },
+                options: chartOptions
+            });
+
+            histogramChart = new Chart(ctx3, {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: 'Frequency', 
+                        data: [], 
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderRadius: 8,
+                        borderColor: '#3b82f6',
+                        borderWidth: 1
+                    }] 
+                },
+                options: {
+                    ...chartOptions,
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Frequency', color: '#94a3b8' } } }
+                }
+            });
+
+            anomalyChart = new Chart(ctx4, {
+                type: 'scatter',
+                data: { 
+                    datasets: [
+                        { 
+                            label: 'Normal Readings', 
+                            data: [], 
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)', 
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }, 
+                        { 
+                            label: 'Anomalies Detected', 
+                            data: [], 
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)', 
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        }
+                    ] 
+                },
+                options: {
+                    ...chartOptions,
+                    scales: { 
+                        x: { title: { display: true, text: 'Reading Number', color: '#94a3b8' } }, 
+                        y: { title: { display: true, text: 'Temperature (°C)', color: '#94a3b8' } } 
+                    }
+                }
+            });
+        }
+
+        // Linear regression prediction
+        function predictFutureTemperatures(data, steps) {
+            if (data.length < 3) return Array(steps).fill(data[data.length - 1] || 25);
+            
+            let x = [], y = [];
+            for (let i = 0; i < data.length; i++) { x.push(i); y.push(data[i]); }
+            
+            let n = x.length;
+            let sumX = x.reduce((a, b) => a + b, 0);
+            let sumY = y.reduce((a, b) => a + b, 0);
+            let sumXY = x.reduce((sum, xi, idx) => sum + xi * y[idx], 0);
+            let sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+            
+            let slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            let intercept = (sumY - slope * sumX) / n;
+            
+            let predictions = [];
+            for (let i = 1; i <= steps; i++) {
+                let pred = slope * (data.length + i - 1) + intercept;
+                predictions.push(Math.max(0, Math.min(100, pred)));
+            }
+            return predictions;
+        }
+
+        // Anomaly detection using IQR
+        function detectAnomalies(data) {
+            if (data.length < 4) return [];
+            let sorted = [...data].sort((a, b) => a - b);
+            let q1 = sorted[Math.floor(sorted.length * 0.25)];
+            let q3 = sorted[Math.floor(sorted.length * 0.75)];
+            let iqr = q3 - q1;
+            let lowerBound = q1 - 1.5 * iqr;
+            let upperBound = q3 + 1.5 * iqr;
+            
+            return data.map((temp, idx) => ({ index: idx, temperature: temp, isAnomaly: temp < lowerBound || temp > upperBound }));
+        }
+
+        // Update histogram
+        function updateHistogram(data) {
+            if (data.length === 0) return;
+            let bins = {};
+            let step = 2;
+            for (let temp of data) {
+                let bin = Math.floor(temp / step) * step;
+                let label = `${bin}-${bin + step}°C`;
+                bins[label] = (bins[label] || 0) + 1;
+            }
+            histogramChart.data.labels = Object.keys(bins);
+            histogramChart.data.datasets[0].data = Object.values(bins);
+            histogramChart.update();
+        }
+
+        // Update anomaly chart
+        function updateAnomalyChart(data) {
+            let anomalies = detectAnomalies(data);
+            let normalPoints = anomalies.filter(a => !a.isAnomaly).map(a => ({ x: a.index, y: a.temperature }));
+            let anomalyPoints = anomalies.filter(a => a.isAnomaly).map(a => ({ x: a.index, y: a.temperature }));
+            
+            anomalyChart.data.datasets[0].data = normalPoints;
+            anomalyChart.data.datasets[1].data = anomalyPoints;
+            anomalyChart.update();
+        }
+
+        // Add alert
+        function addAlert(temperature, alertType, message) {
+            let now = new Date().toLocaleTimeString();
+            alertHistory.unshift({ time: now, temperature: temperature.toFixed(1), type: alertType, message: message });
+            if (alertHistory.length > 20) alertHistory.pop();
+            
+            let tbody = document.getElementById('alertsTableBody');
+            if (alertHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">No alerts yet - System monitoring</td></tr>';
+            } else {
+                tbody.innerHTML = alertHistory.map(alert => `
+                    <tr class="${alert.type === 'CRITICAL' ? 'alert-critical' : alert.type === 'WARNING' ? 'alert-warning' : ''}">
+                        <td>${alert.time}</td>
+                        <td><strong>${alert.temperature}°C</strong></td>
+                        <td><span style="display: inline-block; padding: 4px 10px; border-radius: 8px; background: ${alert.type === 'CRITICAL' ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)'}">${alert.type}</span></td>
+                        <td>${alert.message}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Update predictive alerts
+        function updatePredictiveAlert(predictions) {
+            let maxPrediction = Math.max(...predictions);
+            let alertDiv = document.getElementById('predictiveAlert');
+            
+            if (maxPrediction >= TEMP_CRITICAL) {
+                alertDiv.innerHTML = `🚨 CRITICAL PREDICTION ALERT! Temperature expected to reach <strong>${maxPrediction.toFixed(1)}°C</strong> within next ${PREDICTION_WINDOW} readings! Immediate action required!`;
+                alertDiv.style.background = 'rgba(239, 68, 68, 0.15)';
+                alertDiv.style.color = '#f87171';
+                alertDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            } else if (maxPrediction >= TEMP_WARNING) {
+                alertDiv.innerHTML = `⚠️ WARNING PREDICTION: Temperature predicted to reach <strong>${maxPrediction.toFixed(1)}°C</strong> soon. Monitor closely and prepare preventive measures.`;
+                alertDiv.style.background = 'rgba(245, 158, 11, 0.15)';
+                alertDiv.style.color = '#fbbf24';
+                alertDiv.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+            } else {
+                alertDiv.innerHTML = `✅ System Normal: Maximum predicted temperature <strong>${maxPrediction.toFixed(1)}°C</strong> within safe operating range.`;
+                alertDiv.style.background = 'rgba(34, 197, 94, 0.1)';
+                alertDiv.style.color = '#4ade80';
+                alertDiv.style.border = '1px solid rgba(34, 197, 94, 0.2)';
+            }
+        }
+
+        // Update dashboard
+        function updateDashboard(temperature, humidity) {
+            temperatureData.push(temperature);
+            humidityData.push(humidity);
+            let timestamp = new Date().toLocaleTimeString();
+            timeLabels.push(timestamp);
+            
+            if (temperatureData.length > 50) {
+                temperatureData.shift();
+                humidityData.shift();
+                timeLabels.shift();
+            }
+            
+            // Update stats
+            document.getElementById('currentTemp').innerHTML = temperature.toFixed(1);
+            document.getElementById('currentHum').innerHTML = humidity.toFixed(1);
+            
+            let avgTemp = temperatureData.reduce((a, b) => a + b, 0) / temperatureData.length;
+            let maxTemp = Math.max(...temperatureData);
+            document.getElementById('avgTemp').innerHTML = avgTemp.toFixed(1);
+            document.getElementById('maxTemp').innerHTML = maxTemp.toFixed(1);
+            
+            // Temperature trend
+            if (temperatureData.length >= 2) {
+                let trend = temperatureData[temperatureData.length - 1] - temperatureData[temperatureData.length - 2];
+                let trendElem = document.getElementById('tempTrend');
+                if (trend > 0.5) trendElem.innerHTML = '📈 Rising Rapidly <span class="trend-up">(Alert)</span>';
+                else if (trend > 0) trendElem.innerHTML = '📈 Rising Slowly';
+                else if (trend < -0.5) trendElem.innerHTML = '📉 Dropping Rapidly <span class="trend-down">(Good)</span>';
+                else if (trend < 0) trendElem.innerHTML = '📉 Dropping';
+                else trendElem.innerHTML = '➡️ Stable';
+                trendElem.className = `stat-trend ${trend > 0 ? 'trend-up' : trend < 0 ? 'trend-down' : 'trend-stable'}`;
+            }
+            
+            // Real-time alerts
+            if (temperature >= TEMP_CRITICAL) addAlert(temperature, 'CRITICAL', `Temperature ${temperature.toFixed(1)}°C exceeds critical threshold! Emergency shutdown recommended.`);
+            else if (temperature >= TEMP_WARNING) addAlert(temperature, 'WARNING', `Temperature ${temperature.toFixed(1)}°C exceeds warning threshold. Check cooling system.`);
+            
+            // Update charts
+            realtimeChart.data.labels = timeLabels;
+            realtimeChart.data.datasets[0].data = [...temperatureData];
+            realtimeChart.data.datasets[1].data = [...humidityData];
+            realtimeChart.update();
+            
+            let predictions = predictFutureTemperatures(temperatureData, PREDICTION_WINDOW);
+            let futureLabels = [...Array(PREDICTION_WINDOW)].map((_, i) => `+${i+1}`);
+            predictiveChart.data.labels = futureLabels;
+            predictiveChart.data.datasets[0].data = predictions;
+            predictiveChart.update();
+            
+            updatePredictiveAlert(predictions);
+            updateHistogram(temperatureData);
+            updateAnomalyChart(temperatureData);
+        }
+
+        // Export data
+        function exportData() {
+            let exportData = {
+                timestamp: new Date().toISOString(),
+                readings: temperatureData.map((temp, i) => ({
+                    time: timeLabels[i],
+                    temperature: temp,
+                    humidity: humidityData[i]
+                })),
+                statistics: {
+                    average: (temperatureData.reduce((a,b)=>a+b,0)/temperatureData.length).toFixed(2),
+                    max: Math.max(...temperatureData),
+                    min: Math.min(...temperatureData),
+                    totalReadings: temperatureData.length
+                }
+            };
+            
+            let dataStr = JSON.stringify(exportData, null, 2);
+            let dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            let exportFileDefaultName = `temperature_data_${new Date().toISOString().slice(0,19)}.json`;
+            
+            let linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Clear all historical data? This action cannot be undone.')) {
+                temperatureData = [];
+                humidityData = [];
+                timeLabels = [];
+                alertHistory = [];
+                document.getElementById('alertsTableBody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">No alerts yet - System monitoring</td></tr>';
+                document.getElementById('predictiveAlert').innerHTML = '';
+                document.getElementById('currentTemp').innerHTML = '--';
+                document.getElementById('currentHum').innerHTML = '--';
+                document.getElementById('avgTemp').innerHTML = '--';
+                document.getElementById('maxTemp').innerHTML = '--';
+                document.getElementById('tempTrend').innerHTML = '';
+                
+                realtimeChart.data.datasets[0].data = [];
+                realtimeChart.data.datasets[1].data = [];
+                realtimeChart.update();
+                predictiveChart.data.datasets[0].data = [];
+                predictiveChart.update();
+            }
+        }
+
+        // Serial connection
+        async function connectToSerial() {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 });
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+                document.getElementById('connectionStatus').className = 'status connected';
+                document.getElementById('connectionStatus').innerHTML = '<span>🟢</span> Status: Connected - Receiving data in real-time';
+                
+                reader = port.readable.getReader();
+                readSerialData();
+            } catch (error) {
+                console.error('Connection error:', error);
+                alert('Failed to connect: ' + error.message);
+            }
+        }
+        
+        async function readSerialData() {
+            let decoder = new TextDecoder();
+            let buffer = '';
+            
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value);
+                    let lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    
+                    for (let line of lines) {
+                        line = line.trim();
+                        if (line.includes('TEMP:') && line.includes('HUM:')) {
+                            let tempMatch = line.match(/TEMP:([\d.]+)/);
+                            let humMatch = line.match(/HUM:([\d.]+)/);
+                            if (tempMatch && humMatch) {
+                                let temperature = parseFloat(tempMatch[1]);
+                                let humidity = parseFloat(humMatch[1]);
+                                if (!isNaN(temperature) && !isNaN(humidity)) {
+                                    updateDashboard(temperature, humidity);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Read error:', error);
+            }
+        }
+        
+        async function disconnectFromSerial() {
+            if (reader) {
+                await reader.cancel();
+                reader.releaseLock();
+            }
+            if (port) {
+                await port.close();
+                port = null;
+            }
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('disconnectBtn').disabled = true;
+            document.getElementById('connectionStatus').className = 'status disconnected';
+            document.getElementById('connectionStatus').innerHTML = '<span>⭕</span> Status: Disconnected - Click Connect to start receiving data';
+        }
+        
+        // Initialize
+        initCharts();
+        
+        if ('serial' in navigator) {
+            console.log('Web Serial API supported');
+        } else {
+            alert('Web Serial API not supported. Please use Chrome or Edge browser for COM port connectivity.');
+        }
+    </script>
+</body>
+</html>
